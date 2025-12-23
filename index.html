@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Desapego de Móveis</title>
+
+  <style>
+    /* ===== RESET BÁSICO ===== */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Segoe UI", Tahoma, sans-serif;
+    }
+
+    body {
+      background-color: #f5f5f5;
+      color: #333;
+    }
+
+    header {
+      background-color: #ffffff;
+      padding: 20px;
+      text-align: center;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    }
+
+    header h1 {
+      font-size: 2rem;
+    }
+
+    header p {
+      color: #777;
+    }
+
+    h2, p {
+      text-align: center;
+      margin: 20px;
+    }
+
+    main {
+      max-width: 1200px;
+      margin: 40px auto;
+      padding: 0 20px;
+    }
+
+    /* ===== GRID DOS PRODUTOS ===== */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 40px;
+    }
+
+    .card {
+      background-color: #fff;
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+    }
+
+    .card-content {
+      padding: 18px;
+    }
+
+    .card-content p {
+      text-align: left;
+    }
+
+    .price {
+      font-weight: bold;
+      margin-top: 10px;
+    }
+
+    /* ===== CARROSSEL ===== */
+    .carousel {
+      position: relative;
+      width: 100%;
+      height: 200px;
+      overflow: hidden;
+    }
+
+    .carousel img {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      display: none;
+      cursor: pointer;
+    }
+
+    .carousel img.active {
+      display: block;
+    }
+
+    .carousel button {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(0,0,0,0.6);
+      color: #fff;
+      border: none;
+      padding: 8px 12px;
+      cursor: pointer;
+      border-radius: 50%;
+    }
+
+    .carousel .prev { left: 10px; }
+    .carousel .next { right: 10px; }
+
+    /* ===== BOTÕES DE CONTACTO (APENAS NO TOPO) ===== */
+    .contact-buttons {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin-bottom: 30px;
+    }
+
+    .btn-whatsapp {
+      background: #25D366;
+      color: #fff;
+      padding: 10px 18px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .btn-email {
+      background: #0078d4;
+      color: #fff;
+      padding: 10px 18px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .btn-whatsapp:hover,
+    .btn-email:hover {
+      opacity: 0.85;
+    }
+
+    footer {
+      margin-top: 60px;
+      padding: 20px;
+      text-align: center;
+      background-color: #ffffff;
+      color: #888;
+    }
+
+    /* ===== MODAL DA IMAGEM ===== */
+    .modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.85);
+      justify-content: center;
+      align-items: center;
+      z-index: 999;
+    }
+
+    .modal.active {
+      display: flex;
+    }
+
+    .modal img {
+      max-width: 90%;
+      max-height: 90%;
+      border-radius: 12px;
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <h1>Recheio de Casa</h1>
+  <p>Móveis bonitos e em perfeito estado</p>
+</header>
+
+<h2>Letícia Nicolletti</h2>
+<p>Contacto: 962 751 509 · leticianicolletti@gmail.com</p>
+<p>Recolha em Alverca</p>
+
+<div class="contact-buttons">
+  <a href="https://wa.me/351962751509" target="_blank" class="btn-whatsapp">
+    Contacto via WhatsApp
+  </a>
+  <a href="mailto:leticianicolletti@gmail.com" class="btn-email">
+    Contacto via Email
+  </a>
+</div>
+
+<main>
+  <section class="grid" id="products"></section>
+</main>
+
+<footer>
+  Em caso de dúvidas, contacte-nos através do email ou telefone fornecido acima.
+</footer>
+
+<!-- ===== MODAL ===== -->
+<div class="modal" id="imageModal" onclick="closeModal()">
+  <img id="modalImage">
+</div>
+
+<script>
+  /* ================= ARRAY DE PRODUTOS ================= */
+  const products = [
+  {
+    title: "Cama de casal",
+    description: "Cama de casal em excelente estado com gavetas internas (colchão não incluído).",
+    price: "€180",
+    images: ["cama1.jpeg", "cama2.jpeg", "cama3.jpeg", "cama.jpeg"]
+  },
+  {
+    title: "Colchão de casal",
+    description: "Colchão de casal sem manchas e em ótimo estado.",
+    price: "€125",
+    images: ["colchao2.jpeg", "colchao1.jpeg", "colchao3.jpeg", "colchao.jpeg"]
+  },
+  {
+    title: "Mesa de cabeceira",
+    description: "Mesa de cabeceira branca com gaveta (2 unidades).",
+    price: "€70 (€35 cada)",
+    images: ["mesa_de_cabeceira1.jpeg", "mesa_de_cabeceira2.jpeg", "mesa_de_cabeceira.jpeg"]
+  },
+  {
+    title: "Cama de solteiro",
+    description: "Cama de solteiro em excelente estado com base metálica (colchão não incluído).",
+    price: "€40",
+    images: ["cama_solteiro1.jpeg", "cama_solteiro2.jpeg", "cama_solteiro.jpeg"]
+  },
+  {
+    title: "Colchão de solteiro",
+    description: "Colchão de solteiro sem manchas e em ótimo estado.",
+    price: "€85",
+    images: ["colchao_solteiro1.jpeg", "colchao_solteiro2.jpeg", "colchao_solteiro.jpeg"]
+  },
+  {
+    title: "Macramê",
+    description: "Macramê artesanal e decorativo.",
+    price: "€20",
+    images: ["macrame1.jpeg", "macrame2.jpeg", "macrame3.jpeg"]
+  },
+  {
+    title: "Mesa de jantar",
+    description: "Mesa de jantar em madeira, extende de 130cm para 190cm.",
+    price: "€70",
+    images: ["mesa_jantar1.jpeg", "mesa_jantar.jpeg"]
+  },
+  {
+    title: "Cadeira",
+    description: "Cadeira de madeira em ótimo estado (6 unidades).",
+    price: "€150 (€25 cada)",
+    images: [
+      "cadeira_mesa_jantar1.jpeg",
+      "cadeira_mesa_jantar2.jpeg",
+      "mesa_jantar1.jpeg",
+      "cadeira_mesa_jantar.jpeg"
+    ]
+  },
+  {
+    title: "Móvel para TV",
+    description: "Móvel para TV em madeira. Contém uma pequena rachadura na primeira gaveta.",
+    price: "€90",
+    images: ["movel_tv1.jpeg", "movel_tv2.jpeg", "movel_tv3.jpeg", "movel_tv.jpeg"]
+  },
+  {
+    title: "Sofá/Cama",
+    description: "Sofá/Cama em tecido, 3 lugares, com baú interno.",
+    price: "€220",
+    images: ["sofa1.jpeg", "sofa2.jpeg", "sofa3.jpeg", "sofa.jpeg"]
+  },
+  {
+    title: "Tapete",
+    description: "Tapete com pelos curtos em tons de cinza, ótimo estado 1,70 x 2,40cm.",
+    price: "€65",
+    images: ["tapete1.jpeg", "tapete2.jpeg", "tapete3.jpeg"]
+  },
+  {
+    title: "Abajur",
+    description: "Abajur com base de metal, acende por botão.",
+    price: "€30",
+    images: ["abajur1.jpeg"]
+  },
+  {
+    title: "Estante",
+    description: "Estante com base metálica e prateleiras de madeira.",
+    price: "€15",
+    images: ["estante_quarto2.jpeg"]
+  },
+  {
+    title: "Cômoda",
+    description: "Cômoda em madeira, 4 gavetas grandes, estado excelente.",
+    price: "€45",
+    images: ["comoda1.jpeg", "comoda.jpeg"]
+  },
+  {
+    title: "Mesa de Madeira trançada",
+    description: "Mesa de madeira trançada com baú na parte inferior 70 x 52 cm.",
+    price: "€45",
+    images: ["mesa_madeira2.jpeg", "mesa_madeira3.jpeg"]
+  },
+  {
+    title: "Móvel de Sala",
+    description: "Móvel de sala com topo de vidro e base em madeira.",
+    price: "€60",
+    images: ["movel_sala1.jpeg", "movel_sala2.jpeg", "movel_sala3.jpeg"]
+  },
+  {
+    title: "Pendurador",
+    description: "Pendurador de casacos, feito de madeira.",
+    price: "€20",
+    images: ["pendurador1.jpeg"]
+  },
+  {
+    title: "Sapateira",
+    description: "Sapateira com 2 prateleiras de metal e base em madeira.",
+    price: "€40",
+    images: ["sapateira3.jpeg", "sapateira2.jpeg"]
+  },
+  {
+    title: "Quadros Decorativos",
+    description: "Quadros decorativos em madeira, 3 quadros.",
+    price: "€20",
+    images: ["quadros1.jpeg"]
+  },
+  {
+    title: "Estante de Parede",
+    description: "Estante de parede, feito em madeira.",
+    price: "€10",
+    images: ["estante_parede1.jpeg"]
+  },
+  {
+    title: "Mini Sofá/Cama",
+    description: "Base de ferro, é retrátil e vem com a capa. Pequeno defeito na base de madeira.",
+    price: "€80",
+    images: [
+      "cadeira_cama1.jpeg",
+      "cadeira_cama2.jpeg",
+      "cadeira_cama3.jpeg",
+      "cadeira_cama4.jpeg"
+    ]
+  },
+  {
+    title: "Mesa",
+    description: "Mesa feita em madeira com 2 cadeiras, extensível.",
+    price: "€100",
+    images: ["mesa_cozinha1.jpeg", "mesa_cozinha2.jpeg", "mesa_cozinha3.jpeg"]
+  },
+  {
+    title: "Mesa de Varanda",
+    description: "Mesa de madeira extensível, com os pés um pouco danificados.",
+    price: "€40",
+    images: ["mesa_varanda1.jpeg", "mesa_varanda2.jpeg", "mesa_varanda3.jpeg"]
+  },
+  {
+    title: "Aquecedor",
+    description: "Aquecedor elétrico da Kunft, com regulador e 3 níveis de aquecimento.",
+    price: "€18",
+    images: ["aquecedor1.jpeg", "aquecedor2.jpeg"]
+  },
+  {
+    title: "Aquecedor a óleo",
+    description: "Aquecedor a óleo Kunft, com regulador de temperatura.",
+    price: "€30",
+    images: ["aquecedor2_1.jpeg", "aquecedor2_2.jpeg", "aquecedor2_3.jpeg"]
+  },
+  {
+    title: "Cafeteira",
+    description: "Cafeteira da Delta. Em ótimo estado, funciona perfeitamente.",
+    price: "€20",
+    images: ["cafeteira1.jpeg", "cafeteira2.jpeg"]
+  },
+  {
+    title: "Estante de Cozinha",
+    description: "Estante de madeira para cozinha, com 3 prateleiras.",
+    price: "€20",
+    images: ["estante_cozinha1.jpeg", "estante_cozinha2.jpeg"]
+  },
+  {
+    title: "Armário de Cozinha",
+    description: "Armário de madeira para cozinha, com 3 prateleiras e 2 portas.",
+    price: "€45",
+    images: ["armario_cozinha.jpeg", "armario_cozinha1.jpeg"]
+  },
+  {
+    title: "Bancos",
+    description: "Bancos de madeira para cozinha (3 bancos).",
+    price: "€30",
+    images: ["bancos1.jpeg", "bancos2.jpeg"]
+  },
+  {
+    title: "Mesa de Varanda Retrátil",
+    description: "Mesa de madeira para varanda, retrátil e em ótimo estado.",
+    price: "€30",
+    images: ["mesa_varanda_retratil1.jpeg", "mesa_varanda_retratil2.jpeg"]
+  },
+  {
+    title: "Espelho de Parede",
+    description: "Espelho de parede em madeira, excelente estado.",
+    price: "€18",
+    images: ["espelho1.jpeg", "espelho.jpeg"]
+  },
+  {
+    title: "Estante",
+    description: "Estante de plástico, resistente e prática (2 unidades).",
+    price: "€36 (€18 cada)",
+    images: ["estante.jpeg"]
+  }
+];
+
+  const container = document.getElementById("products");
+
+  /* ================= GERAÇÃO DOS CARDS ================= */
+  products.forEach(product => {
+    const imagesHTML = product.images.map((img, index) => `
+      <img src="${img}" class="${index === 0 ? 'active' : ''}" onclick="openModal(this)">
+    `).join("");
+
+    const card = document.createElement("div");
+    card.className = "card";
+
+    card.innerHTML = `
+      <div class="carousel">
+        ${imagesHTML}
+        <button class="prev" onclick="changeSlide(this, -1)">&#10094;</button>
+        <button class="next" onclick="changeSlide(this, 1)">&#10095;</button>
+      </div>
+
+      <div class="card-content">
+        <h3>${product.title}</h3>
+        <p>${product.description}</p>
+        <div class="price">${product.price}</div>
+      </div>
+    `;
+
+    container.appendChild(card);
+  });
+
+  /* ================= CARROSSEL ================= */
+  function changeSlide(button, direction) {
+    const carousel = button.parentElement;
+    const images = carousel.querySelectorAll("img");
+    let currentIndex = 0;
+
+    images.forEach((img, index) => {
+      if (img.classList.contains("active")) {
+        currentIndex = index;
+        img.classList.remove("active");
+      }
+    });
+
+    let newIndex = currentIndex + direction;
+    if (newIndex < 0) newIndex = images.length - 1;
+    if (newIndex >= images.length) newIndex = 0;
+
+    images[newIndex].classList.add("active");
+  }
+
+  /* ================= MODAL ================= */
+  function openModal(img) {
+    document.getElementById("modalImage").src = img.src;
+    document.getElementById("imageModal").classList.add("active");
+  }
+
+  function closeModal() {
+    document.getElementById("imageModal").classList.remove("active");
+  }
+</script>
+
+</body>
+</html>
